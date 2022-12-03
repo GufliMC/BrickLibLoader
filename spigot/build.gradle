@@ -1,0 +1,36 @@
+plugins {
+    id 'net.minecrell.plugin-yml.bukkit' version '0.5.1'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+}
+
+dependencies {
+    // provided by platform
+    compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
+
+    // shadow
+    implementation 'org.apache.maven:maven-resolver-provider:3.8.6'
+    implementation 'org.apache.maven.resolver:maven-resolver-connector-basic:1.9.2'
+    implementation 'org.apache.maven.resolver:maven-resolver-transport-http:1.9.2'
+}
+
+bukkit {
+    name = '000_' + rootProject.name
+    main = 'com.guflimc.brick.libloader.spigot.SpigotBrickLibLoader'
+    description = 'Lib loader'
+    author = 'GufliMC'
+    website = 'https://github.com/GufliMC/BrickLibLoader'
+    apiVersion = '1.13'
+    load = 'STARTUP'
+}
+
+shadowJar {
+    archiveBaseName.set("000_${rootProject.name}")
+}
+
+// I want it nice like that
+generateBukkitPluginDescription.group = "minecraft"
