@@ -26,22 +26,24 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SpigotBrickLibraryLoader {
+public class PluginLibraryLoader {
 
-    private final Logger logger;
-    private final RepositorySystem repository;
+    public static PluginLibraryLoader INSTANCE;
+
+    final RepositorySystem repository;
     private final DefaultRepositorySystemSession session;
 
     private final List<RemoteRepository> repositories;
 
-    public SpigotBrickLibraryLoader(Logger logger) {
-        this.logger = logger;
+    public PluginLibraryLoader(Logger logger) {
+        INSTANCE = this;
 
         DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
         locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
         locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
 
         this.repository = locator.getService(RepositorySystem.class);
+
         this.session = MavenRepositorySystemUtils.newSession();
 
         session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
@@ -59,16 +61,16 @@ public class SpigotBrickLibraryLoader {
     }
 
     public void addRepository(String id, String url) {
+        if ( repositories.stream().anyMatch(r -> r.getUrl().equalsIgnoreCase(url) || r.getId().equals(id)) ) {
+            return;
+        }
         repositories.add(new RemoteRepository.Builder(id, "default", url).build());
     }
 
-    public void load(@NotNull String pluginName, @NotNull List<String> libraries) {
+    public void load(@NotNull List<String> libraries) {
         if (libraries.isEmpty()) {
             return;
         }
-
-        logger.log(Level.INFO, "[{0}] Loading {1} libraries... please wait",
-                new Object[]{pluginName, libraries.size()});
 
         List<Dependency> dependencies = new ArrayList<>();
         for (String library : libraries) {
